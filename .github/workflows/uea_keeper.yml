@@ -1,0 +1,38 @@
+name: UEA Streamlit Keeper
+
+on:
+  schedule:
+    # Corre todos os dias às 10:00 UTC (06:00 AM Horário de Manaus)
+    - cron: '0 10 * * *'
+  workflow_dispatch: # Permite ativar a automação manualmente pelo painel do GitHub
+
+jobs:
+  rpa_wake_up:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📥 Clonar o repositório atual
+      uses: actions/checkout@v4
+
+    - name: 🐍 Configurar o ambiente Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: 📦 Instalar dependências básicas
+      run: |
+        python -m pip install --upgrade pip
+        pip install playwright
+
+    - name: 🌐 Instalar o Navegador Chromium e dependências do sistema
+      run: playwright install chromium --with-deps
+
+    - name: 🤖 Executar o Script RPA
+      run: python wake_up.py
+
+    - name: 📸 Guardar Evidência em caso de Falha
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: evidencias-erro
+        path: screenshot_erro.png
