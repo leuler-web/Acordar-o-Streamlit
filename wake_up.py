@@ -14,43 +14,44 @@ def main():
         
         try:
             print("🌐 Navegando para o painel...")
-            page.goto(STREAMLIT_URL, wait_until="networkidle", timeout=60000)
-            
-            # Pausa de 5 segundos para garantir que tudo carregou internamente
-            page.wait_for_timeout(5000)
+            page.goto(STREAMLIT_URL, wait_until="domcontentloaded", timeout=60000)
             
             botao_acordar = None
+            seletor_botao = '[data-testid="wakeup-button-viewer"]'
             
-            # 1. Tentar encontrar o botão na página principal
-            botao_principal = page.locator('[data-testid="wakeup-button-viewer"]')
-            if botao_principal.is_visible():
-                botao_acordar = botao_principal
-                print("🎯 Botão de hibernação encontrado na página principal!")
-            
-            # 2. Se não encontrar, procurar dentro de possíveis IFRAMEs (janelas internas)
-            if not botao_acordar:
-                print("🔍 Botão não visível na página principal. Procurando dentro de frames internos...")
+            # 1. Tentar aguardar ativamente o botão surgir na página principal (até 15 segundos)
+            print("🔍 Verificando se a tela de hibernação vai carregar...")
+            try:
+                loc = page.locator(seletor_botao)
+                loc.wait_for(state="visible", timeout=15000)
+                botao_acordar = loc
+                print("🎯 Botão de hibernação detectado na página principal!")
+            except Exception:
+                # 2. Se não aparecer na principal, procurar ativamente nos frames internos
+                print("🔍 Botão não surgiu na página principal. Verificando frames internos...")
                 for frame in page.frames:
-                    botao_no_frame = frame.locator('[data-testid="wakeup-button-viewer"]')
-                    if botao_no_frame.is_visible():
-                        botao_acordar = botao_no_frame
-                        print("🎯 Botão de hibernação localizado dentro de um frame interno!")
+                    try:
+                        loc_frame = frame.locator(seletor_botao)
+                        loc_frame.wait_for(state="visible", timeout=3000)
+                        botao_acordar = loc_frame
+                        print("🎯 Botão de hibernação localizado num frame interno!")
                         break
+                    except Exception:
+                        pass
             
-            # ESTRATÉGIA REATIVA: Se o botão foi encontrado em algum lugar
+            # ESTRATÉGIA REATIVA: Se o botão for confirmado
             if botao_acordar:
                 print("🚨 [MODO REATIVO]: O painel está em hibernação ('sleep mode').")
                 print("🖱️ Clicando no botão para acordar o servidor...")
                 botao_acordar.click()
                 
                 print("⏳ Aguardando a inicialização do contentor do Streamlit...")
-                # Esperar 45 segundos para dar tempo do Streamlit subir a aplicação
                 page.wait_for_timeout(45000)
                 print("✅ Sucesso! Comando de inicialização enviado.")
             
-            # ESTRATÉGIA PREVENTIVA: Se o botão não apareceu em lado nenhum
+            # ESTRATÉGIA PREVENTIVA: Se após a espera o botão realmente não existir
             else:
-                print("🌿 [MODO PREVENTIVO]: O botão de acordar não foi visto. O painel já deve estar ativo.")
+                print("🌿 [MODO PREVENTIVO]: Nenhum botão de hibernação apareceu. O painel está ativo.")
                 print("⏱️ Mantendo a sessão aberta por 20 segundos para registar tráfego...")
                 page.wait_for_timeout(20000)
                 print("✅ Tráfego simulado com sucesso!")
