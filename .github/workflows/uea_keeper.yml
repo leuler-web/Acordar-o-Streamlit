@@ -4,7 +4,7 @@ on:
   schedule:
     # Corre todos os dias às 10:00 UTC (06:00 AM Horário de Manaus)
     - cron: '0 10 * * *'
-  workflow_dispatch: # Permite ativar a automação manualmente pelo painel do GitHub
+  workflow_dispatch:
 
 jobs:
   rpa_wake_up:
@@ -12,10 +12,10 @@ jobs:
 
     steps:
     - name: 📥 Clonar o repositório atual
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2
 
     - name: 🐍 Configurar o ambiente Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v5.3.0
       with:
         python-version: '3.11'
 
@@ -29,10 +29,3 @@ jobs:
 
     - name: 🤖 Executar o Script RPA
       run: python wake_up.py
-
-    - name: 📸 Guardar Evidência em caso de Falha
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: evidencias-erro
-        path: screenshot_erro.png
