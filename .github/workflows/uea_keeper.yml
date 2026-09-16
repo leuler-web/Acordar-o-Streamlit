@@ -2,9 +2,15 @@ name: UEA Streamlit Keeper
 
 on:
   schedule:
-    # Corre todos os dias às 10:00 UTC (06:00 AM Horário de Manaus)
-    - cron: '0 10 * * *'
+    # Corre todos os dias às 10:14 UTC (06:14 AM Horário de Manaus)
+    # Alterado de :00 para :14 para evitar congestionamento nos servidores
+    - cron: '14 10 * * *'
   workflow_dispatch:
+
+# 🔑 LIBERA PERMISSÃO DE ESCRITA PARA O KEEPALIVE FUNCIONAR
+permissions:
+  actions: write
+  contents: write
 
 jobs:
   rpa_wake_up:
