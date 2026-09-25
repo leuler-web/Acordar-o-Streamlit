@@ -36,5 +36,5 @@ jobs:
     - name: 🤖 Executar o Script RPA
       run: python wake_up.py
       
-    - name: 🛡️ Prevenir suspensão do Cron (Keepalive)
-      uses: gautamkrishnar/keepalive-workflow@v2
+ #   - name: 🛡️ Prevenir suspensão do Cron (Keepalive)
+ #    uses: gautamkrishnar/keepalive-workflow@v2
